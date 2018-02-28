@@ -22,3 +22,7 @@ class QuestionSubmissionJSONRenderer(QuizsysJSONRenderer):
     object_label = 'question_submission'
     object_label_plural = 'question_submissions'
 
+
+class AnnouncementJSONRenderer(QuizsysJSONRenderer):
+    object_label = 'announcement'
+    object_label_plural = 'announcements'

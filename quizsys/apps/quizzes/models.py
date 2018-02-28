@@ -1,6 +1,7 @@
 from django.db import models
 
 from quizsys.apps.core.models import TimestampedModel
+from quizsys.apps.users.models import User
 
 
 class Quiz(TimestampedModel):
@@ -11,6 +12,7 @@ class Quiz(TimestampedModel):
     questions_per_page = models.PositiveIntegerField(default=1)
     labgroup = models.ForeignKey('users.Group', on_delete=models.SET_NULL, related_name='quizzes', null=True)
     pass_score = models.FloatField(default=0)
+    push_notification = models.NullBooleanField(default=True, null=True)
 
     class Meta:
         verbose_name_plural = 'quizzes'
@@ -58,4 +60,13 @@ class QuestionSubmission(TimestampedModel):
     is_correct = models.BooleanField(default=False)
     is_graded = models.BooleanField(default=False)
     response = models.TextField(blank=True)
+
+
+class Announcement(TimestampedModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.content + " - " + self.user.username
 

@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from quizsys.apps.core.relations import CustomizedDateTimeField
 from quizsys.apps.questions.models import Question
-from quizsys.apps.quizzes.models import Quiz, ScoreDistribution, QuestionSubmission, QuizSubmission
+from quizsys.apps.quizzes.models import Quiz, ScoreDistribution, QuestionSubmission, QuizSubmission, Announcement
 from quizsys.apps.quizzes.relations import QuestionRelatedField, QuizRelatedField
 from quizsys.apps.users.relations import UserRelatedField, GroupRelatedField
 
@@ -106,4 +106,17 @@ class QuizSubmissionSerializer(serializers.ModelSerializer):
         for question_submission in question_submissions:
             QuestionSubmission.objects.create(quiz_submission=quiz_submission ,**question_submission)
 
+        if quiz_submission.is_graded and quiz_submission.quiz.push_notification and quiz_submission.score < quiz_submission.quiz.pass_score:
+            content = "You did not score enough to pass the quiz '%s'. All the best for the next quiz."
+            Announcement.objects.create(user=quiz_submission.user, content=content % quiz_submission.quiz.title)
+
         return quiz_submission
+
+
+class AnnouncementSerializer(serializers.ModelSerializer):
+    user = UserRelatedField()
+    id = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Announcement
+        fields = ('user', 'content', 'is_read', 'id')

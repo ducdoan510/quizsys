@@ -3,11 +3,11 @@ from django.conf.urls import url
 from quizsys.apps.quizzes.views import QuizListCreateAPIView, QuizRetrieveUpdateDestroyAPIView, \
     QuizSubmissionListCreateAPIView, QuizSubmissionRetrieveAPIView, ScoreDistributionListCreateAPIView, \
     ScoreDistributionDestroyAPIView, QuizQuestionsListAPIView, QuizSubmissionAllListAPIView, QuizFilteredListAPIView, \
-    QuizSendEmailAPIView
+    SendEmailAPIView, QuizFailedUsersAPIView, AnnouncementListAPIView
 
 app_name = 'quizzes'
 
-urlpatterns = [
+urlpatterns = {
     url(r'^quizzes/?$', QuizListCreateAPIView.as_view()),
     url(r'^quiz/(?P<quiz_pk>\d+)/?$', QuizRetrieveUpdateDestroyAPIView.as_view()),
     url(r'^quiz/(?P<quiz_pk>\d+)/score-distributions/?$', ScoreDistributionListCreateAPIView.as_view()),
@@ -19,6 +19,8 @@ urlpatterns = [
     url(r'^quiz-submissions/?$', QuizSubmissionAllListAPIView.as_view()),
     url(r'^quiz-submissions-filtered/?$', QuizFilteredListAPIView.as_view()),
 
-    url(r'send-email/?', QuizSendEmailAPIView.as_view()),
-    url(r'quiz-send-email/(?P<quiz_pk>\d+)/?', QuizSendEmailAPIView.as_view())
-]
+    url(r'^send-email/?', SendEmailAPIView.as_view()),
+    url(r'^quiz-failed-users/?', QuizFailedUsersAPIView.as_view()),
+
+    url(r'^announcements/(?P<username>[\w]+)/?$', AnnouncementListAPIView.as_view()),
+}

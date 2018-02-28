@@ -1,3 +1,4 @@
+import re
 from datetime import timedelta
 
 from django.core.mail import send_mail, send_mass_mail
@@ -13,9 +14,11 @@ from rest_framework.views import APIView
 from quizsys.apps.questions.models import Question
 from quizsys.apps.questions.renderers import QuestionJSONRenderer, QuestionAllJSONRenderer
 from quizsys.apps.questions.serializers import QuestionSerializer
-from quizsys.apps.quizzes.models import Quiz, QuizSubmission, ScoreDistribution
-from quizsys.apps.quizzes.renderers import QuizJSONRenderer, QuizSubmissionJSONRenderer, ScoreDistributionJSONRenderer
-from quizsys.apps.quizzes.serializers import QuizSerializer, QuizSubmissionSerializer, ScoreDistributionSerializer
+from quizsys.apps.quizzes.models import Quiz, QuizSubmission, ScoreDistribution, Announcement
+from quizsys.apps.quizzes.renderers import QuizJSONRenderer, QuizSubmissionJSONRenderer, ScoreDistributionJSONRenderer, \
+    AnnouncementJSONRenderer
+from quizsys.apps.quizzes.serializers import QuizSerializer, QuizSubmissionSerializer, ScoreDistributionSerializer, \
+    AnnouncementSerializer
 from quizsys.apps.users.models import User
 from quizsys.apps.users.renderers import UserJSONRenderer, UserAllJSONRenderer
 from quizsys.apps.users.serializers import UserSerializer
@@ -315,14 +318,39 @@ class QuizSubmissionAllListAPIView(generics.ListAPIView):
         return self.get_paginated_response(serializer.data)
 
 
-class QuizSendEmailAPIView(APIView):
+class QuizFailedUsersAPIView(APIView):
     permission_classes = (IsAuthenticated, IsAdminUser,)
     renderer_classes = (UserAllJSONRenderer,)
     serializer_class = UserSerializer
 
-    def post(self, request, quiz_pk=None):
+    def post(self, request):
+        try:
+            quiz = Quiz.objects.get(title=request.data.get('quizTitle', '').strip())
+        except Quiz.DoesNotExist:
+            raise exceptions.NotFound("Quiz does not exist")
+
+        print(quiz)
+        pass_score = quiz.pass_score
+        failed_quiz_user_ids = [item['user'] for item in QuizSubmission.objects.filter(quiz=quiz, score__lt=pass_score).values('user')]
+        failed_quiz_users = User.objects.filter(pk__in=failed_quiz_user_ids)
+        serializer = self.serializer_class(failed_quiz_users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SendEmailAPIView(APIView):
+    permission_classes = (IsAuthenticated, IsAdminUser,)
+
+    def post(self, request):
         from_email = request.data.get('from_email', '')
         to_emails = request.data.get('to_emails', '').split(";")
+        to_emails = [email.strip() for email in to_emails if email != '']
+        for email in to_emails:
+            if not re.match(r'[^@]+@[^@]+\.[^@]+', email):
+                return Response({
+                    'errors': {
+                        'detail': 'Invalid email(s) detected'
+                    }
+                }, status=status.HTTP_400_BAD_REQUEST)
         title = request.data.get('title', '')
         content = request.data.get('content', '')
 
@@ -336,16 +364,21 @@ class QuizSendEmailAPIView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def get(self, request, quiz_pk=None):
+
+class AnnouncementListAPIView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = AnnouncementSerializer
+    renderer_classes = (AnnouncementJSONRenderer,)
+
+    def get_queryset(self):
         try:
-            quiz = Quiz.objects.get(pk=quiz_pk)
-        except Quiz.DoesNotExist:
-            return exceptions.NotFound("Quiz does not exist")
+            user = User.objects.get(username=self.kwargs['username'])
+        except User.DoesNotExist:
+            raise exceptions.NotFound('User does not exist')
+        return Announcement.objects.filter(user=user)
 
-        pass_score = quiz.pass_score
-        failed_quiz_user_ids = [item['user'] for item in QuizSubmission.objects.filter(quiz=quiz, score__lt=pass_score).values('user')]
-        failed_quiz_users = User.objects.filter(pk__in=failed_quiz_user_ids)
-        serializer = self.serializer_class(failed_quiz_users, many=True)
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
