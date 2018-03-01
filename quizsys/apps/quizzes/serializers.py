@@ -41,7 +41,7 @@ class QuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
         fields = ('pk', 'start_time', 'end_time', 'description', 'title',
-                  'labgroup', 'questions_per_page', 'number_of_questions', 'total_points', 'pass_score')
+                  'labgroup', 'questions_per_page', 'number_of_questions', 'total_points', 'pass_score', 'push_notification')
 
     def create(self, validated_data):
         score_distributions = validated_data.pop('score_distributions', [])
@@ -95,7 +95,8 @@ class QuizSubmissionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QuizSubmission
-        fields = ('pk', 'quiz', 'user', 'score', 'question_submissions', 'is_graded', 'average_scores', 'pass_score')
+        fields = ('pk', 'quiz', 'user', 'score', 'question_submissions', 'is_graded', 'average_scores',
+                  'pass_score')
 
     def create(self, validated_data):
         user = self.context['user']
