@@ -130,7 +130,9 @@ class UserUploadAPIView(APIView):
                     try:
                         user = User.objects.get(username=username)
                     except User.DoesNotExist:
-                        User.objects.create_user(username=username, password=username)
+                        user = User.objects.create_user(username=username, password=username)
+                        user.group = group
+                        user.save()
         except Exception as exc:
             print(exc)
             return Response({

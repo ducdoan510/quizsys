@@ -1,2 +1,6 @@
-python-decouple
-xlrd
+python_decouple==3.1
+pandas==0.21.0
+Django==2.0.2
+python_dateutil==2.7.0
+PyJWT==1.6.1
+djangorestframework==3.7.7
