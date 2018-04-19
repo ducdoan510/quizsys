@@ -4,7 +4,7 @@ from quizsys.apps.questions.views import (
     QuestionListCreateAPIView, QuestionRetrieveUpdateDestroyAPIView,
     ChoiceListCreateAPIView, ChoiceUpdateDestroyAPIView,
     AnswerListCreateAPIView, AnswerUpdateDestroyAPIView, TestCaseListCreateAPIView, TestCaseUpdateDestroyAPIView,
-    TagListAPIView, QuestionsListByTagsAPIView)
+    TagListAPIView, QuestionsListByTagsAPIView, QuestionSampleTestAPIView)
 
 app_name = 'questions'
 
@@ -23,5 +23,7 @@ urlpatterns = [
     url(r'^question/(?P<question_pk>\d+)/testcases/?$', TestCaseListCreateAPIView.as_view()),
     url(r'^question/(?P<question_pk>\d+)/testcases/(?P<testcase_pk>\d+)/?$', TestCaseUpdateDestroyAPIView.as_view()),
     # tag views
-    url(r'^tags/?$', TagListAPIView.as_view())
+    url(r'^tags/?$', TagListAPIView.as_view()),
+    # run sample testcases
+    url(r'^question/run-sample-test', QuestionSampleTestAPIView.as_view()),
 ]

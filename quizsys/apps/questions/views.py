@@ -2,9 +2,12 @@ from django.db.models import Q, Count
 from rest_framework import generics, status, exceptions
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from quizsys.apps.core.renderers import QuizsysJSONRenderer
+from quizsys.apps.questions.graders import grade_question
 from quizsys.apps.questions.models import Question, Choice, Answer, TestCase, Tag
 from quizsys.apps.questions.renderers import QuestionJSONRenderer, ChoiceJSONRenderer, AnswerJSONRenderer, \
     TestCaseJSONRenderer, TagJSONRenderer
@@ -196,3 +199,21 @@ class TagListAPIView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         serializer = self.serializer_class(self.get_queryset(), many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class QuestionSampleTestAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        question_id = int(request.data.get("question_id"))
+        try:
+            question = Question.objects.get(pk=question_id)
+        except Question.DoesNotExist:
+            raise exceptions.NotFound("Question does not exist")
+
+        response = request.data.get("response", "")
+        results = grade_question(question, response, sample_test=True)
+        return Response({
+            'results': results
+        }, status=status.HTTP_200_OK)
+
