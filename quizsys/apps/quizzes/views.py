@@ -288,7 +288,7 @@ class QuizSubmissionListCreateAPIView(generics.ListCreateAPIView):
 
 
 class QuizSubmissionRetrieveAPIView(generics.RetrieveAPIView):
-    permission_classes = (IsAuthenticated, IsAdminUser,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (QuizSubmissionJSONRenderer,)
     serializer_class = QuizSubmissionSerializer
 
@@ -301,7 +301,7 @@ class QuizSubmissionRetrieveAPIView(generics.RetrieveAPIView):
         else:
             try:
                 user = User.objects.get(username=username)
-                quiz_submission = QuizSubmission.objects.filter(quiz=quiz_pk, user=user)[-1]
+                quiz_submission = QuizSubmission.objects.get(quiz=quiz_pk, user=user)
             except User.DoesNotExist:
                 raise exceptions.NotFound("User does not exist")
             except QuizSubmission.DoesNotExist:

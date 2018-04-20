@@ -17,14 +17,15 @@ def grade_question(question, response, file_suffix=None, sample_test=False):
         correct_choices_str = ';'.join(correct_choice_pks)
 
         response = ";".join(sorted(response.split(";")))
-        return {"status": response == correct_choices_str}
+        return {"status": response == correct_choices_str, "extra_info": correct_choices_str}
     if question.type == 'FIB':
         status = False
         accepted_answers = question.answers
-        for accepted_answer in accepted_answers.all():
-            if response == accepted_answer.content:
+        accepted_answers_content = [accepted_answer.content for accepted_answer in accepted_answers.all()]
+        for accepted_answer in accepted_answers_content:
+            if response == accepted_answer:
                 status = True
-        return {"status": status}
+        return {"status": status, "extra_info": ";".join(accepted_answers_content)}
 
     # question.type == "COD" - coding question
 

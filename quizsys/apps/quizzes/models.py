@@ -72,6 +72,10 @@ class QuestionSubmission(TimestampedModel):
     is_correct = models.BooleanField(default=False)
     is_graded = models.BooleanField(default=False)
     response = models.TextField(blank=True)
+    extra_info = models.TextField() # this field will be used to provide information to students after submission
+                                    # COD: concatenated strings of failed test cases
+                                    # MCQ: correct answers
+                                    # FIB: accepted answers
 
 
 class Announcement(TimestampedModel):
