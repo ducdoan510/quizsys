@@ -16,6 +16,7 @@ urlpatterns = {
 
     url(r'^quiz/(?P<quiz_pk>\d+)/quiz-submissions/?$', QuizSubmissionListCreateAPIView.as_view()),
     url(r'^quiz-submissions/(?P<quiz_submission_pk>\d+)/?$', QuizSubmissionRetrieveAPIView.as_view()),
+    url(r'^quiz-submissions/quiz/(?P<quiz_pk>\d+)/user/(?P<username>[\w]+)/?$', QuizSubmissionRetrieveAPIView.as_view()),
     url(r'^quiz-submissions/?$', QuizSubmissionAllListAPIView.as_view()),
     url(r'^quiz-submissions-filtered/?$', QuizFilteredListAPIView.as_view()),
 

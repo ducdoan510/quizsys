@@ -100,16 +100,16 @@ class QuizRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
         except Quiz.DoesNotExist:
             raise exceptions.NotFound("Quiz does not exist")
 
-        quiz_submission = None
-        try:
-            if not request.user.is_staff:
-                quiz_submission = quiz.quiz_submissions.get(user=request.user)
-        except QuizSubmission.DoesNotExist:
-            quiz_submission = None
-
-        if quiz_submission is not None:
-            serializer = QuizSubmissionSerializer(quiz_submission)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        # quiz_submission = None
+        # try:
+        #     if not request.user.is_staff:
+        #         quiz_submission = quiz.quiz_submissions.get(user=request.user)
+        # except QuizSubmission.DoesNotExist:
+        #     quiz_submission = None
+        #
+        # if quiz_submission is not None:
+        #     serializer = QuizSubmissionSerializer(quiz_submission)
+        #     return Response(serializer.data, status=status.HTTP_200_OK)
 
         serializer = self.serializer_class(quiz)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -292,11 +292,20 @@ class QuizSubmissionRetrieveAPIView(generics.RetrieveAPIView):
     renderer_classes = (QuizSubmissionJSONRenderer,)
     serializer_class = QuizSubmissionSerializer
 
-    def retrieve(self, request, quiz_submission_pk=None):
-        try:
-            quiz_submission = QuizSubmission.objects.get(pk=quiz_submission_pk)
-        except QuizSubmission.DoesNotExist:
-            raise exceptions.NotFound("Quiz submission doest not exist")
+    def retrieve(self, request, quiz_submission_pk=None, quiz_pk=None, username=None):
+        if quiz_submission_pk:
+            try:
+                quiz_submission = QuizSubmission.objects.get(pk=quiz_submission_pk)
+            except QuizSubmission.DoesNotExist:
+                raise exceptions.NotFound("Quiz submission doest not exist")
+        else:
+            try:
+                user = User.objects.get(username=username)
+                quiz_submission = QuizSubmission.objects.filter(quiz=quiz_pk, user=user)[-1]
+            except User.DoesNotExist:
+                raise exceptions.NotFound("User does not exist")
+            except QuizSubmission.DoesNotExist:
+                raise exceptions.NotFound("Quiz submission does not exist")
 
         serializer = self.serializer_class(quiz_submission)
         return Response(serializer.data, status=status.HTTP_200_OK)

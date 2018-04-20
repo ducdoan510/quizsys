@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 from quizsys.apps.core.models import TimestampedModel
 from quizsys.apps.users.models import User
@@ -34,6 +35,16 @@ class Quiz(TimestampedModel):
             if not quiz_submission.is_graded:
                 return "Grading in progress..."
         return str(quiz_submissions.aggregate(models.Avg('score'))['score__avg'])
+
+    @property
+    def quiz_status(self):
+        if timezone.now() < self.start_time:
+            return "not start"
+        if timezone.now() <= self.end_time:
+            return "in progress"
+        if timezone.now() < self.answer_release_time:
+            return "ended"
+        return "release answer"
 
 
 class ScoreDistribution(TimestampedModel):

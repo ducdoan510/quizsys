@@ -38,10 +38,11 @@ class QuizSerializer(serializers.ModelSerializer):
     start_time = CustomizedDateTimeField()
     end_time = CustomizedDateTimeField()
     answer_release_time = CustomizedDateTimeField()
+    quiz_status = serializers.CharField(max_length=20, read_only=True)
 
     class Meta:
         model = Quiz
-        fields = ('pk', 'start_time', 'end_time', 'answer_release_time', 'description', 'title',
+        fields = ('pk', 'start_time', 'end_time', 'answer_release_time', 'description', 'title', 'quiz_status',
                   'labgroup', 'questions_per_page', 'number_of_questions', 'total_points', 'pass_score', 'push_notification')
 
     def create(self, validated_data):
