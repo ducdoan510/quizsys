@@ -37,10 +37,11 @@ class QuizSerializer(serializers.ModelSerializer):
     total_points = serializers.FloatField(read_only=True)
     start_time = CustomizedDateTimeField()
     end_time = CustomizedDateTimeField()
+    answer_release_time = CustomizedDateTimeField()
 
     class Meta:
         model = Quiz
-        fields = ('pk', 'start_time', 'end_time', 'description', 'title',
+        fields = ('pk', 'start_time', 'end_time', 'answer_release_time', 'description', 'title',
                   'labgroup', 'questions_per_page', 'number_of_questions', 'total_points', 'pass_score', 'push_notification')
 
     def create(self, validated_data):
@@ -105,7 +106,7 @@ class QuizSubmissionSerializer(serializers.ModelSerializer):
         quiz_submission = QuizSubmission.objects.create(user=user, quiz=quiz, **validated_data)
 
         for question_submission in question_submissions:
-            QuestionSubmission.objects.create(quiz_submission=quiz_submission ,**question_submission)
+            QuestionSubmission.objects.create(quiz_submission=quiz_submission, **question_submission)
 
         if quiz_submission.is_graded and quiz_submission.quiz.push_notification and quiz_submission.score < quiz_submission.quiz.pass_score:
             content = "You did not score enough to pass the quiz '%s'. All the best for the next quiz."

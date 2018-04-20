@@ -7,6 +7,7 @@ from quizsys.apps.users.models import User
 class Quiz(TimestampedModel):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+    answer_release_time = models.DateTimeField(blank=True, null=True)
     description = models.TextField(blank=True)
     title = models.CharField(max_length=20, unique=True)
     questions_per_page = models.PositiveIntegerField(default=1)
