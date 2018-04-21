@@ -17,13 +17,15 @@ def grade_and_update_quiz_score(sender, instance, created, *args, **kwargs):
     response = instance.response
 
     question_point = ScoreDistribution.objects.get(question=question, quiz=quiz).point
-    response_correct = grade_question(question, response, file_suffix=instance.pk)["status"]
+    grading_result = grade_question(question, response, file_suffix=instance.pk)
+    response_correct = grading_result["status"]
 
     quiz_submission.score += question_point * response_correct
     quiz_submission.save()
 
     instance.is_correct = response_correct
     instance.is_graded = True
+    instance.extra_info = grading_result['extra_info']
     instance.save()
 
 

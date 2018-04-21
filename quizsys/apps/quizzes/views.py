@@ -170,13 +170,13 @@ class QuizQuestionsListAPIView(generics.ListAPIView):
                 }
             }, status=status.HTTP_202_ACCEPTED)
 
-        if (not self.request.user.is_staff) and (timezone.now() > quiz.end_time):
-            # quiz.start_time.astimezone(local_tz).strftime("%Y-%m-%d %H:%M:%S%Z")
-            return Response({
-                "errors": {
-                    "detail": "This quiz has finished"
-                }
-            }, status=status.HTTP_202_ACCEPTED)
+        # if (not self.request.user.is_staff) and (timezone.now() > quiz.end_time):
+        #     # quiz.start_time.astimezone(local_tz).strftime("%Y-%m-%d %H:%M:%S%Z")
+        #     return Response({
+        #         "errors": {
+        #             "detail": "This quiz has finished"
+        #         }
+        #     }, status=status.HTTP_202_ACCEPTED)
 
         queryset = self.get_queryset()
         serializer = self.serializer_class(queryset, many=True)
@@ -259,12 +259,12 @@ class QuizSubmissionListCreateAPIView(generics.ListCreateAPIView):
             'user': request.user
         }
 
-        if timezone.now() > quiz.end_time:
-            return Response({
-                'errors': {
-                    'detail': 'Deadline for this quiz has passed'
-                }
-            }, status=status.HTTP_400_BAD_REQUEST)
+        # if timezone.now() > quiz.end_time:
+        #     return Response({
+        #         'errors': {
+        #             'detail': 'Deadline for this quiz has passed'
+        #         }
+        #     }, status=status.HTTP_400_BAD_REQUEST)
 
         if QuizSubmission.objects.filter(quiz=quiz, user=request.user).count() > 0:
             return Response({
@@ -305,7 +305,12 @@ class QuizSubmissionRetrieveAPIView(generics.RetrieveAPIView):
             except User.DoesNotExist:
                 raise exceptions.NotFound("User does not exist")
             except QuizSubmission.DoesNotExist:
-                raise exceptions.NotFound("Quiz submission does not exist")
+                return Response({
+                        'quiz_submission': {
+                            'question_submissions': []
+                        }
+                    }
+                )
 
         serializer = self.serializer_class(quiz_submission)
         return Response(serializer.data, status=status.HTTP_200_OK)
