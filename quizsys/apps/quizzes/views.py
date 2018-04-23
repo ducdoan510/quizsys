@@ -259,12 +259,12 @@ class QuizSubmissionListCreateAPIView(generics.ListCreateAPIView):
             'user': request.user
         }
 
-        # if timezone.now() > quiz.end_time:
-        #     return Response({
-        #         'errors': {
-        #             'detail': 'Deadline for this quiz has passed'
-        #         }
-        #     }, status=status.HTTP_400_BAD_REQUEST)
+        if timezone.now() > quiz.end_time:
+            return Response({
+                'errors': {
+                    'detail': 'Deadline for this quiz has passed'
+                }
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         if QuizSubmission.objects.filter(quiz=quiz, user=request.user).count() > 0:
             return Response({

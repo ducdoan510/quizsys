@@ -74,8 +74,6 @@ class QuestionSubmission(TimestampedModel):
     response = models.TextField(blank=True)
     extra_info = models.TextField(default="", null=True, blank=True) # this field will be used to provide information to students after submission
                                     # COD: concatenated strings of failed test cases
-                                    # MCQ: correct answers
-                                    # FIB: accepted answers
 
 
 class Announcement(TimestampedModel):

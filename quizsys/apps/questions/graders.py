@@ -17,7 +17,7 @@ def grade_question(question, response, file_suffix=None, sample_test=False):
         correct_choices_str = ';'.join(correct_choice_pks)
 
         response = ";".join(sorted(response.split(";")))
-        return {"status": response == correct_choices_str, "extra_info": correct_choices_str}
+        return {"status": response == correct_choices_str}
     if question.type == 'FIB':
         status = False
         accepted_answers = question.answers
@@ -25,7 +25,7 @@ def grade_question(question, response, file_suffix=None, sample_test=False):
         for accepted_answer in accepted_answers_content:
             if response == accepted_answer:
                 status = True
-        return {"status": status, "extra_info": ";".join(accepted_answers_content)}
+        return {"status": status}
 
     # question.type == "COD" - coding question
 
@@ -39,6 +39,8 @@ def grade_question(question, response, file_suffix=None, sample_test=False):
     testcases = question.testcases.all()
     if sample_test:
         testcases = testcases[:3]
+    else:
+        testcases = testcases[3:]
 
     failed_testcases = []
     errors = set([])
@@ -67,7 +69,8 @@ def grade_question(question, response, file_suffix=None, sample_test=False):
     return {
         'status': status,
         'extra_info': ";".join([str(testcase_pk) for testcase_pk in failed_testcases]),
-        'code_errors': "; ".join(list(errors))
+        'code_errors': "; ".join(list(errors)),
+        'score': (testcases.count() - len(failed_testcases)) * 1.0 / testcases.count()
     }
 
 
