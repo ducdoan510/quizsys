@@ -62,6 +62,7 @@ def grade_question(question, response, file_suffix=None, sample_test=False):
 
         submitted_output, submitted_error = run_script(script_path, testcase.input)
         if submitted_output != output.strip():
+            print("Failed %s != %s" % (submitted_output, output.strip()))
             failed_testcases.append(testcase.pk)
             errors.add(submitted_error)
             status = False
@@ -75,21 +76,21 @@ def grade_question(question, response, file_suffix=None, sample_test=False):
 
 
 def run_script(script_path, input=""):
-    command = ["python", script_path]
+    command = [config('PYTHON_PATH'), script_path]
     proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
-    # time.sleep(1)
     try:
         submitted_output, submitted_error = proc.communicate(input.encode('utf-8'), timeout=5)
     except subprocess.TimeoutExpired:
         print("subprocess.TimeoutExpired")
         return "", "RuntimeError: Your program may not terminate"
-    # if proc.poll() is None:
-    #     proc.kill()
+
     os.remove(script_path)
-    # submitted_output = proc.stdout.read().strip().decode('utf-8')
-    # submitted_error = proc.stderr.read().strip().decode('utf-8')
     submitted_output = submitted_output.decode('utf-8').strip()
     submitted_error = submitted_error.decode('utf-8').strip()
+
+    print(submitted_output)
+    print(submitted_error)
+
     if submitted_error != "":
         submitted_error = submitted_error.split("\n")[-1]
     return submitted_output, submitted_error
