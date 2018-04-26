@@ -70,6 +70,7 @@ class QuestionSubmission(TimestampedModel):
     question = models.ForeignKey('questions.Question', on_delete=models.CASCADE, related_name='question_submissions')
     quiz_submission = models.ForeignKey(QuizSubmission, on_delete=models.CASCADE, related_name='question_submissions')
     is_correct = models.BooleanField(default=False)
+    score = models.FloatField(default=0)
     is_graded = models.BooleanField(default=False)
     response = models.TextField(blank=True)
     extra_info = models.TextField(default="", null=True, blank=True) # this field will be used to provide information to students after submission

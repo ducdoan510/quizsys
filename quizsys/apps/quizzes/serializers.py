@@ -79,11 +79,12 @@ class QuestionSubmissionSerializer(serializers.ModelSerializer):
     question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
     pk = serializers.IntegerField(read_only=True)
     is_correct = serializers.BooleanField(read_only=True)
+    score = serializers.FloatField(read_only=True)
     extra_info = serializers.CharField(max_length=255, read_only=True)
 
     class Meta:
         model = QuestionSubmission
-        fields = ('pk', 'question', 'is_correct', 'response', 'extra_info')
+        fields = ('pk', 'question', 'is_correct', 'response', 'extra_info', 'score')
 
 
 class QuizSubmissionSerializer(serializers.ModelSerializer):

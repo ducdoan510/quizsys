@@ -65,6 +65,7 @@ def callback(ch, method, properties, body):
     quiz_submission.save()
 
     instance.is_correct = response_correct
+    instance.score = question_point * question_score
     instance.is_graded = True
     instance.extra_info = grading_result.pop('extra_info', "")
     instance.save()

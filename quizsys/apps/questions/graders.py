@@ -63,13 +63,14 @@ def grade_question(question, response, file_suffix=None, sample_test=False):
         submitted_output, submitted_error = run_script(script_path, testcase.input)
         if submitted_output != output.strip():
             print("Failed %s != %s" % (submitted_output, output.strip()))
-            failed_testcases.append(testcase.pk)
+            failed_testcases.append("%d-%s" % (testcase.pk, submitted_output))
             errors.add(submitted_error)
             status = False
 
+    # print(failed_testcases)
     return {
         'status': status,
-        'extra_info': ";".join([str(testcase_pk) for testcase_pk in failed_testcases]),
+        'extra_info': ";".join([failed_testcase for failed_testcase in failed_testcases]),
         'code_errors': "; ".join(list(errors)),
         'score': (testcases.count() - len(failed_testcases)) * 1.0 / testcases.count()
     }
@@ -81,15 +82,12 @@ def run_script(script_path, input=""):
     try:
         submitted_output, submitted_error = proc.communicate(input.encode('utf-8'), timeout=5)
     except subprocess.TimeoutExpired:
-        print("subprocess.TimeoutExpired")
+        # print("subprocess.TimeoutExpired")
         return "", "RuntimeError: Your program may not terminate"
 
     os.remove(script_path)
     submitted_output = submitted_output.decode('utf-8').strip()
     submitted_error = submitted_error.decode('utf-8').strip()
-
-    print(submitted_output)
-    print(submitted_error)
 
     if submitted_error != "":
         submitted_error = submitted_error.split("\n")[-1]
