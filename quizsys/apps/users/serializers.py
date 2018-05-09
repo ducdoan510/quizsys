@@ -27,7 +27,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
                 group = Group.objects.get(name=group_name)
             except Group.DoesNotExist:
                 raise exceptions.NotFound('Group does not exists')
-            return User.objects.create(group=group, **validated_data)
+            user = User.objects.create_user(**validated_data)
+            user.group = group
+            user.save()
+            return user
         return User.objects.create_user(**validated_data)
 
 

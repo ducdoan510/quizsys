@@ -40,4 +40,7 @@ class QuizRelatedField(serializers.RelatedField):
         return quiz
 
     def to_representation(self, value):
-        return value.title
+        return {
+            "pk": value.pk,
+            "title": value.title
+        }

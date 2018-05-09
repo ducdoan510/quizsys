@@ -42,7 +42,7 @@ def grade_question(question, response, file_suffix=None, sample_test=False):
     else:
         testcases = testcases[3:]
 
-    failed_testcases = []
+    failed_testcases = ["quizsys"] # really sorry for this line of code, should be [], but this is necessary when displaying the green color for the correct test cases in the case that all tests are passed
     errors = set([])
 
     code = get_code(question, response)
