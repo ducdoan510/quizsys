@@ -42,15 +42,25 @@ class QuestionsListByTagsAPIView(APIView):
 
     def post(self, request):
         tag_contents = request.data.get('tagFilters', [])
+
+        print(tag_contents)
+
         tags = Tag.objects.filter(content__in=tag_contents)
-        filtered_questions = Question.objects.exclude(~Q(tags__in=tags))\
-            .annotate(tag_count=Count('tags')).filter(tag_count__gte=tags.count())
+        # filtered_questions = Question.objects.exclude(~Q(tags__in=tags))\
+        #     .annotate(tag_count=Count('tags')).filter(tag_count__gte=tags.count())
+
+        filtered_questions = []
+        for question in Question.objects.all():
+            tags = [tag.content for tag in question.tags.all()]
+            if set(tag_contents).issubset(set(tags)):
+                filtered_questions.append(question)
+
         paginator = LimitOffsetPagination()
         page = paginator.paginate_queryset(filtered_questions, request)
         serializer = self.serializer_class(page, many=True)
         return Response({
             'results': serializer.data,
-            'count': filtered_questions.count()
+            'count': len(filtered_questions)
         }, status=status.HTTP_200_OK)
 
 
