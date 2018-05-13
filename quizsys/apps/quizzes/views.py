@@ -14,7 +14,7 @@ from rest_framework.views import APIView
 from quizsys.apps.questions.models import Question
 from quizsys.apps.questions.renderers import QuestionJSONRenderer, QuestionAllJSONRenderer
 from quizsys.apps.questions.serializers import QuestionSerializer
-from quizsys.apps.quizzes.models import Quiz, QuizSubmission, ScoreDistribution, Announcement
+from quizsys.apps.quizzes.models import Quiz, QuizSubmission, ScoreDistribution, Announcement, QuestionSubmission
 from quizsys.apps.quizzes.renderers import QuizJSONRenderer, QuizSubmissionJSONRenderer, ScoreDistributionJSONRenderer, \
     AnnouncementJSONRenderer
 from quizsys.apps.quizzes.serializers import QuizSerializer, QuizSubmissionSerializer, ScoreDistributionSerializer, \
@@ -396,3 +396,33 @@ class AnnouncementListAPIView(generics.ListAPIView):
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+class QuizReportAPIView(APIView):
+    permission_classes = (IsAuthenticated, IsAdminUser,)
+    renderer_classes = (QuizJSONRenderer,)
+
+    def get(self, request, quiz_title=None):
+        try:
+            quiz = Quiz.objects.get(title=quiz_title)
+        except Quiz.DoesNotExist:
+            raise exceptions.NotFound("Quiz does not exist")
+        quiz_submissions_score = [[
+            quiz_submission.score,
+            quiz_submission.user.username
+        ] for quiz_submission in QuizSubmission.objects.filter(quiz=quiz)]
+        questions = [score_dist.question for score_dist in ScoreDistribution.objects.filter(quiz=quiz)]
+
+        question_submissions = []
+        for question in questions:
+            submissions = QuestionSubmission.objects.filter(question=question, quiz_submission__quiz=quiz)
+            question_submissions.append({
+                'pk': question.pk,
+                'title': question.title,
+                'tags': [tag.content for tag in question.tags.all()],
+                'type': question.type,
+                'percentage': submissions.filter(is_correct=True).count() / submissions.count() * 100
+            })
+        return Response({
+            'scores': sorted(quiz_submissions_score),
+            'questions': question_submissions
+        }, status=status.HTTP_200_OK)
